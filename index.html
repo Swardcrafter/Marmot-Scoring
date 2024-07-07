@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<title>Marmot</title>
+		<meta name="description" content="" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1"
+		/>
+	</head>
+	<body>
+		<input id="add_user_field" type="text" />
+		<button id="add_user_btn">Add User</button>
+		<button id="clear_users_btn">Clear Users</button>
+
+		<div id="users_display"></div>
+
+		<script>
+			const add_user_btn =
+				document.getElementById("add_user_btn");
+			const add_user_input =
+				document.getElementById("add_user_field");
+			const clear_users_btn =
+				document.getElementById("clear_users_btn");
+			const users_display =
+				document.getElementById("users_display");
+
+			let users = [];
+
+			// Function to display users
+			function DisplayValues() {
+				// Clear current display
+				users_display.innerHTML = "";
+
+				// Render each user
+				users.forEach((user, index) => {
+					const user_div =
+						document.createElement("div");
+
+					const user_text =
+						document.createElement("h3");
+					user_text.innerText = `${user.name}: ${
+						user.score
+					}, Total Moves: ${
+						user.total_moves
+					}, Moves: ${user.past_moves.join(
+						", "
+					)}`;
+
+					const user_plus =
+						document.createElement(
+							"button"
+						);
+					user_plus.innerText = "+";
+					user_plus.onclick = function () {
+						let add_amt =
+							prompt("Add Amount");
+						while (
+							!/^(-?\d+(\.\d+)?)?$/.test(
+								add_amt
+							)
+						) {
+							add_amt =
+								prompt(
+									"Add Amount"
+								);
+						}
+						if (
+							add_amt !== null &&
+							add_amt !== ""
+						) {
+							users[index].score +=
+								parseFloat(
+									add_amt
+								);
+							users[
+								index
+							].past_moves.push(
+								parseFloat(
+									add_amt
+								)
+							);
+							users[
+								index
+							].total_moves += 1;
+							DisplayValues();
+						}
+					};
+
+					user_div.appendChild(user_text);
+					user_div.appendChild(user_plus);
+					users_display.appendChild(user_div);
+				});
+			}
+
+			// Function to clear users with confirmation
+			clear_users_btn.onclick = function () {
+				if (
+					confirm(
+						"Are you sure you want to clear all users?"
+					)
+				) {
+					users = [];
+					localStorage.removeItem("users");
+					DisplayValues();
+				}
+			};
+
+			// Function to add a new user
+			add_user_btn.onclick = function () {
+				let user_name = add_user_input.value.trim();
+				if (user_name !== "") {
+					let user = users.find(
+						(user_) =>
+							user_.name === user_name
+					);
+					if (!user) {
+						users.push({
+							name: user_name,
+							score: 0,
+							past_moves: [],
+							total_moves: 0,
+						});
+						add_user_input.value = "";
+						DisplayValues();
+					}
+				}
+			};
+
+			// Load users from localStorage if available
+			if (localStorage.getItem("users")) {
+				users = JSON.parse(
+					localStorage.getItem("users")
+				);
+				DisplayValues();
+			}
+
+			// Save users to localStorage on window unload
+			window.onbeforeunload = function () {
+				localStorage.setItem(
+					"users",
+					JSON.stringify(users)
+				);
+			};
+		</script>
+	</body>
+</html>
